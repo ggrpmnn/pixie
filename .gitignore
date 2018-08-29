@@ -10,3 +10,9 @@
 
 # Output of the go coverage tool, specifically when used with LiteIDE
 *.out
+
+# Ignore vendor dir (but keep the dir itself)
+vendor/
+
+# Ignore the config file
+pixie-config.json
