@@ -8,8 +8,9 @@ import (
 
 // Command represents a command that can be sent to the bot
 type Command struct {
-	Name string
-	Fn   func([]string) (string, *BotError)
+	Name        string
+	Fn          func([]string) (string, *BotError)
+	Description string
 }
 
 // ValidCommands contains the list of valid commands that the bot can process
@@ -20,10 +21,10 @@ func init() {
 	ValidCommands = make(map[string]Command)
 	ValidCommands["bg"] = Command{}    //TODO
 	ValidCommands["class"] = Command{} //TODO
-	ValidCommands["help"] = Command{Name: "help", Fn: ListCommands}
+	ValidCommands["help"] = Command{Name: "help", Fn: ListCommands, Description: "list available commands"}
 	ValidCommands["item"] = Command{} //TODO
 	ValidCommands["race"] = Command{} //TODO
-	ValidCommands["roll"] = Command{Name: "roll", Fn: Roll}
+	ValidCommands["roll"] = Command{Name: "roll", Fn: Roll, Description: "simulate dice rolls"}
 	ValidCommands["rule"] = Command{}  //TODO
 	ValidCommands["spell"] = Command{} //TODO
 
@@ -57,7 +58,7 @@ func Run(input string) (string, *BotError) {
 
 	//TODO: remove this block when all commands are implemented
 	if cmd.Fn == nil {
-		return "Sorry, but this is coming soon! :sob:", nil
+		return "Sorry, but this command is coming soon! :sob:", nil
 	}
 
 	output, err := cmd.Fn(params)
@@ -71,8 +72,12 @@ func Run(input string) (string, *BotError) {
 // ListCommands lists the available commands the user can input
 func ListCommands(input []string) (string, *BotError) {
 	output := "Hey there. Here are the things I know how to do: "
-	for key := range ValidCommands {
-		output += key + ", "
+	for key, cmd := range ValidCommands {
+		if cmd.Description != "" {
+			output += fmt.Sprintf("%s (%s), ", key, cmd.Description)
+		} else {
+			output += key + ", "
+		}
 	}
 	return strings.TrimSuffix(output, ", "), nil
 }
