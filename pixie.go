@@ -18,13 +18,14 @@ var ValidCommands map[string]func([]string) (string, *BotError)
 func init() {
 	// initialize the list of valid commands
 	ValidCommands = make(map[string]func([]string) (string, *BotError))
-	ValidCommands["bg"] = nil    //TODO
-	ValidCommands["class"] = nil //TODO
-	ValidCommands["item"] = nil  //TODO
-	ValidCommands["race"] = nil  //TODO
+	//ValidCommands["bg"] = nil    //TODO
+	//ValidCommands["class"] = nil //TODO
+	ValidCommands["help"] = ListCommands
+	//ValidCommands["item"] = nil  //TODO
+	//ValidCommands["race"] = nil  //TODO
 	ValidCommands["roll"] = Roll
-	ValidCommands["rule"] = nil  //TODO
-	ValidCommands["spell"] = nil //TODO
+	//ValidCommands["rule"] = nil  //TODO
+	//ValidCommands["spell"] = nil //TODO
 }
 
 // ParseCommand takes a string sent to the bot and parses it for processing
@@ -34,7 +35,7 @@ func ParseCommand(cmd string) (*Command, *BotError) {
 	val := strings.ToLower(strTokens[0])
 	if _, ok := ValidCommands[val]; !ok {
 		return nil, &BotError{err: fmt.Sprintf("received invalid command '%s'", val),
-			botMsg: fmt.Sprintf("Sorry! I don't know what to do with '%s'!", val)}
+			botMsg: fmt.Sprintf("Sorry, I don't know what to do with '%s'!", val)}
 	}
 
 	return &Command{Task: strTokens[0], Params: strTokens[1:], Response: nil}, nil
@@ -55,4 +56,13 @@ func RunCommand(cmdStr string) (string, *BotError) {
 	}
 
 	return output, nil
+}
+
+// ListCommands lists the available commands the user can input
+func ListCommands(input []string) (string, *BotError) {
+	output := "Hey there. Here are the things I know how to do: "
+	for key := range ValidCommands {
+		output += key + ", "
+	}
+	return strings.TrimSuffix(output, ", "), nil
 }
