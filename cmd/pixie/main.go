@@ -52,16 +52,32 @@ func main() {
 // messageCreate handles events triggered by the creation of a message in Discord
 func messageCreate(s *discord.Session, m *discord.MessageCreate) {
 	// check whether the bot should respond to the message
-	botCmd := "!" + pixie.BotName() + " "
-	if !strings.HasPrefix(m.Content, botCmd) {
+	botPrefix := "!" + pixie.BotName() + " "
+	if !strings.HasPrefix(m.Content, botPrefix) {
 		return
 	}
-	cmdStr := strings.TrimPrefix(m.Content, botCmd)
-	log.Printf("Received request from '%s': %s", m.Author, cmdStr)
+	cmdStr := strings.TrimPrefix(m.Content, botPrefix)
+	log.Printf("Received command request from '%s': %s", m.Author, cmdStr)
 
-	reply := fmt.Sprintf("<@%s> %s! Got it!", m.Author.ID, cmdStr)
+	// attempt to run the supplied command
+	resp, err := pixie.RunCommand(cmdStr)
+	if err != nil {
+		log.Printf(err.Error())
+		sendReply(s, m, err.BotMessage())
+		return
+	}
+
+	// resp has already been formatted; send it
+	sendReply(s, m, resp)
+	return
+}
+
+// sendReply sends a reply message to the server
+func sendReply(s *discord.Session, m *discord.MessageCreate, msg string) {
+	log.Printf("Sending reply to channel")
+	reply := fmt.Sprintf("<@%s> %s", m.Author.ID, msg)
 	_, err := s.ChannelMessageSend(m.ChannelID, reply)
 	if err != nil {
-		log.Printf("ERROR: %s", err.Error())
+		log.Printf("Failed to send reply to channel: %s", err.Error())
 	}
 }
