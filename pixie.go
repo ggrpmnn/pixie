@@ -2,55 +2,65 @@ package pixie
 
 import (
 	"fmt"
+	"log"
 	"strings"
 )
 
-// Command represents the contents of a command sent to the bot
+// Command represents a command that can be sent to the bot
 type Command struct {
-	Task     string
-	Params   []string
-	Response []byte
+	Name string
+	Fn   func([]string) (string, *BotError)
 }
 
 // ValidCommands contains the list of valid commands that the bot can process
-var ValidCommands map[string]func([]string) (string, *BotError)
+var ValidCommands map[string]Command
 
 func init() {
 	// initialize the list of valid commands
-	ValidCommands = make(map[string]func([]string) (string, *BotError))
-	//ValidCommands["bg"] = nil    //TODO
-	//ValidCommands["class"] = nil //TODO
-	ValidCommands["help"] = ListCommands
-	//ValidCommands["item"] = nil  //TODO
-	//ValidCommands["race"] = nil  //TODO
-	ValidCommands["roll"] = Roll
-	//ValidCommands["rule"] = nil  //TODO
-	//ValidCommands["spell"] = nil //TODO
+	ValidCommands = make(map[string]Command)
+	ValidCommands["bg"] = Command{}    //TODO
+	ValidCommands["class"] = Command{} //TODO
+	ValidCommands["help"] = Command{Name: "help", Fn: ListCommands}
+	ValidCommands["item"] = Command{} //TODO
+	ValidCommands["race"] = Command{} //TODO
+	ValidCommands["roll"] = Command{Name: "roll", Fn: Roll}
+	ValidCommands["rule"] = Command{}  //TODO
+	ValidCommands["spell"] = Command{} //TODO
+
+	if len(ValidCommands) == 0 {
+		log.Fatalf("No commands available to run; exiting")
+	}
 }
 
-// ParseCommand takes a string sent to the bot and parses it for processing
-func ParseCommand(cmd string) (*Command, *BotError) {
-	strTokens := strings.SplitN(cmd, " ", 2)
+// ParseUserInput takes a string sent to the bot and parses it for processing
+func ParseUserInput(input string) (string, []string, *BotError) {
+	strTokens := strings.SplitN(input, " ", 2)
 	// validate that the command is something we can process
 	val := strings.ToLower(strTokens[0])
 	if _, ok := ValidCommands[val]; !ok {
-		return nil, &BotError{err: fmt.Sprintf("received invalid command '%s'", val),
+		return "", nil, &BotError{err: fmt.Sprintf("received invalid command '%s'", val),
 			botMsg: fmt.Sprintf("Sorry, I don't know what to do with '%s'!", val)}
 	}
 
-	return &Command{Task: strTokens[0], Params: strTokens[1:], Response: nil}, nil
+	return strTokens[0], strTokens[1:], nil
 }
 
-// RunCommand executes the command string
-func RunCommand(cmdStr string) (string, *BotError) {
-	cmd, err := ParseCommand(cmdStr)
+// Run attempts to process and execute the user's input, if possible
+func Run(input string) (string, *BotError) {
+	name, params, err := ParseUserInput(input)
 	if err != nil {
 		return "", err
 	}
 
 	// get the func tied to the task and execute it to get the output
-	fn := ValidCommands[cmd.Task]
-	output, err := fn(cmd.Params)
+	cmd := ValidCommands[name]
+
+	//TODO: remove this block when all commands are implemented
+	if cmd.Fn == nil {
+		return "Sorry, but this is coming soon! :sob:", nil
+	}
+
+	output, err := cmd.Fn(params)
 	if err != nil {
 		return "", err
 	}

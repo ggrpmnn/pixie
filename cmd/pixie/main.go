@@ -60,7 +60,7 @@ func messageCreate(s *discord.Session, m *discord.MessageCreate) {
 	log.Printf("Received command request from '%s': %s", m.Author, cmdStr)
 
 	// attempt to run the supplied command
-	resp, err := pixie.RunCommand(cmdStr)
+	resp, err := pixie.Run(cmdStr)
 	if err != nil {
 		log.Printf(err.Error())
 		sendReply(s, m, err.BotMessage())
