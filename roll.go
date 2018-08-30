@@ -9,9 +9,13 @@ import (
 	"time"
 )
 
+// A regex to match '(X)YdZ' or 'YdZ' inputs, where X is the number of times
+// to roll all dice, Y is the number of dice to roll each time, and Z is the
+// type of dice to roll (ex., Z=4 rolls a 4-sided die, etc.)
 const diceRegex = `(\(\d+\)){0,1}(\d+)d(\d+)`
 
-// Roll rolls some dice
+// Roll parses the message input via regex, rolls the dice, and returns
+// the formatted output
 func Roll(input []string) (string, *BotError) {
 	rx := regexp.MustCompile(diceRegex)
 	matches := rx.FindStringSubmatch(input[0])
@@ -19,15 +23,14 @@ func Roll(input []string) (string, *BotError) {
 		return "", &BotError{err: fmt.Sprintf("failed to parse roll input: %s", input[0]),
 			botMsg: fmt.Sprintf("Oops! To roll, ask me like this: (X)YdZ\n  X: The number of times you want to roll (optional)\n  Y: The number of dice to roll\n  Z: The type of dice to roll (doesn't have to be a real die)")}
 	}
-	// fmt.Printf("%v\n", matches)
 	times := parseTimesInt(matches[1])
 	dieNum, _ := strconv.Atoi(matches[2])
 	dieType, _ := strconv.Atoi(matches[3])
-	// fmt.Printf("%d, %d, %d\n", times, dieNum, dieType)
 	return rollDice(times, dieNum, dieType), nil
 }
 
-// rollDice rolls the dice and returns the formatted output
+// rollDice simulates dice rolling by generating random numbers in sets and
+// sequences specified by the user's parsed input
 func rollDice(times int, dieNum int, dieType int) string {
 	output := "Here's your rolls, as requested!"
 	for idx := 0; idx < times; idx++ {
@@ -51,7 +54,8 @@ func rollDice(times int, dieNum int, dieType int) string {
 }
 
 // parseTimesInt takes the optional first match from the regex (e.g. '(2)')
-// and converts it to its int value
+// and converts it to its int value; if it wasn't passed, or can't be parsed,
+// it will default to 1 (so there will be exactly one set of rolls performed)
 func parseTimesInt(times string) int {
 	times = strings.TrimPrefix(times, "(")
 	times = strings.TrimSuffix(times, ")")
