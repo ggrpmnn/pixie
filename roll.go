@@ -17,7 +17,7 @@ func Roll(input []string) (string, *BotError) {
 	matches := rx.FindStringSubmatch(input[0])
 	if len(matches) != 4 {
 		return "", &BotError{err: fmt.Sprintf("failed to parse roll input: %s", input[0]),
-			botMsg: fmt.Sprintf("Oops! To roll, ask me like this: (X)YdZ\n  X: The number of times you want to roll (optional)\n  Y: The number of dice to roll\n  Z: The type of dice to roll (doesn't have to be a real die!)")}
+			botMsg: fmt.Sprintf("Oops! To roll, ask me like this: (X)YdZ\n  X: The number of times you want to roll (optional)\n  Y: The number of dice to roll\n  Z: The type of dice to roll (doesn't have to be a real die)")}
 	}
 	// fmt.Printf("%v\n", matches)
 	times := parseTimesInt(matches[1])
