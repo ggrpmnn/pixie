@@ -32,7 +32,7 @@ func Roll(input []string) (string, *BotError) {
 // rollDice simulates dice rolling by generating random numbers in sets and
 // sequences specified by the user's parsed input
 func rollDice(times int, dieNum int, dieType int) string {
-	output := "Here's your rolls, as requested!"
+	output := ":game_die: Here's your rolls, as requested!"
 	for idx := 0; idx < times; idx++ {
 		// seed a new random source for each iteration
 		source := rand.NewSource(time.Now().UnixNano())

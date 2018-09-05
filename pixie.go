@@ -70,7 +70,7 @@ func Run(input string) (string, *BotError) {
 
 // ListCommands lists the available commands the user can input
 func ListCommands(input []string) (string, *BotError) {
-	output := "Hey there. Here are the things I know how to do:"
+	output := ":information_source: Hey there. Here are the things I know how to do:"
 	for key, cmd := range ValidCommands {
 		output += fmt.Sprintf("\n:point_right: %s", key)
 		if cmd.Description != "" {
