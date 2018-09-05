@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"regexp"
 	"strings"
 )
 
@@ -17,16 +18,15 @@ var (
 	rule  = "rule"
 	spell = "spell"
 
-	lookup Lookup
+	dataDir = "./data/"
 
 	filesLoaded = false
+
+	lookup []SourceEntry
 )
 
-// Lookup provides an interface for looking up data on different entities
-type Lookup map[string]Entry
-
-// Entry houses the data for a particular entry parsed from the data files
-type Entry struct {
+// SourceEntry houses the data for a particular entry parsed from the data files
+type SourceEntry struct {
 	Name   string
 	Type   string
 	Page   string
@@ -34,50 +34,50 @@ type Entry struct {
 }
 
 func init() {
-	lookup = make(Lookup, 0)
-
-	files, err := ioutil.ReadDir("./data")
+	files, err := ioutil.ReadDir(dataDir)
 	if err != nil || len(files) == 0 {
 		log.Printf("Failed to load data files; disabling reference functionality")
 		return
 	}
 
+	lookup = make([]SourceEntry, 0)
+	// load the data from each CSV file
 	for _, file := range files {
-		fileName := file.Name()
-		fileHandle, err := os.Open("./data/" + fileName)
-		if err != nil {
-			log.Printf("Failed to load file '%s'", fileName)
-			continue
-		}
-		reader := csv.NewReader(fileHandle)
-		data, err := reader.ReadAll()
-		if err != nil {
-			log.Printf("Failed to read file '%s'", fileName)
-			continue
-		}
-		lookup.LoadFromCSV(data)
+		log.Printf("Loading data file '%s'", file.Name())
+		lookup = append(lookup, LoadFromCSV(file)...)
 	}
 
 	filesLoaded = true
 }
 
-// LoadFromCSV adds data to a Lookup object
-func (l Lookup) LoadFromCSV(data [][]string) {
-	// trim header row
-	data = data[1:][:]
-	for _, row := range data {
-		name := row[1]
-		if val, ok := l[name]; ok {
-			log.Printf("Found colliding values for '%s'; original is type '%s' and new is type '%s'; skipping", name, val.Type, "")
-			continue
-		}
-		l[name] = Entry{Name: name, Type: row[0], Page: row[2], Source: row[3]}
-	}
-}
-
 // FilesLoaded returns whether the files were loaded correctly or not; set in init()
 func FilesLoaded() bool {
 	return filesLoaded
+}
+
+// filter filters the list based on the specified function's criteria
+func filter(entries []SourceEntry, criteria string, fn func(SourceEntry, string) bool) *[]SourceEntry {
+	results := make([]SourceEntry, 0)
+	for _, entry := range entries {
+		if fn(entry, criteria) {
+			results = append(results, entry)
+		}
+	}
+	return &results
+}
+
+// filterType is a filter function for trimming entries based on type (exact match)
+func filterType(entry SourceEntry, kind string) bool {
+	if entry.Type == kind {
+		return true
+	}
+	return false
+}
+
+// filterName is a filter function for trimming entries based on name (via regex)
+func filterName(entry SourceEntry, nameQuery string) bool {
+	match, _ := regexp.MatchString(nameQuery, entry.Name)
+	return match
 }
 
 // FindBackground attempts to find the specified background (source book and page number)
@@ -113,9 +113,56 @@ func FindSpell(input []string) (string, *BotError) {
 // find attempts to locate various items in the local data files
 func find(entryType string, query string) (string, *BotError) {
 	query = strings.ToLower(query)
-	if val, ok := lookup[query]; ok && entryType == val.Type {
-		return fmt.Sprintf("Got it! %s is on p. %s of %s :smile:", val.Name, val.Page, val.Source), nil
+	// lookup the type, then the name
+	results := filter(lookup, entryType, filterType)
+	if len(*results) > 0 {
+		results = filter(*results, query, filterName)
 	}
+
+	// process and return filtered results
+	numResults := len(*results)
+	entries := *results
+	if numResults > 0 {
+		if numResults == 1 {
+			return fmt.Sprintf(":book: Found it! %s is on p. %s of %s.", strings.Title(entries[0].Name), entries[0].Page, entries[0].Source), nil
+		}
+		resp := ":book: I found multiple entries for you!"
+		for _, entry := range entries {
+			resp += fmt.Sprintf("\n%s is on p. %s of %s", strings.Title(entry.Name), entry.Page, entry.Source)
+		}
+		return resp, nil
+	}
+
 	return "", &BotError{err: fmt.Sprintf("Failed to find %s-type entry for '%s'", entryType, query),
-		botMsg: fmt.Sprintf("Sorry! I couldn't find a %s called '%s'... :cry:", entryType, query)}
+		botMsg: fmt.Sprintf(":x: Sorry! I couldn't find a %s called '%s'...", entryType, strings.Title(query))}
+}
+
+// LoadFromCSV adds data to a Lookup object
+func LoadFromCSV(file os.FileInfo) []SourceEntry {
+	fileName := file.Name()
+	fileHandle, err := os.Open(dataDir + fileName)
+	if err != nil {
+		log.Printf("Failed to open data file '%s'", fileName)
+		return nil
+	}
+	reader := csv.NewReader(fileHandle)
+	data, err := reader.ReadAll()
+	if err != nil {
+		log.Printf("Failed to read data file '%s'", fileName)
+		return nil
+	}
+
+	// trim header row
+	data = data[1:][:]
+	entries := make([]SourceEntry, len(data))
+	for idx, row := range data {
+		entries[idx] = SourceEntry{
+			Name:   row[0],
+			Type:   strings.TrimSuffix(fileName, ".csv"),
+			Page:   row[1],
+			Source: row[2],
+		}
+	}
+
+	return entries
 }
