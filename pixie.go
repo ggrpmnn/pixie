@@ -72,11 +72,10 @@ func Run(input string) (string, *BotError) {
 func ListCommands(input []string) (string, *BotError) {
 	output := "Hey there. Here are the things I know how to do:"
 	for key, cmd := range ValidCommands {
+		output += fmt.Sprintf("\n:point_right: %s", key)
 		if cmd.Description != "" {
-			output += fmt.Sprintf("\n:arrow_forward: %s (%s)", key, cmd.Description)
-		} else {
-			output += fmt.Sprintf("\n:arrow_forward: %s", key)
+			output += fmt.Sprintf("(%s)", cmd.Description)
 		}
 	}
-	return strings.TrimSuffix(output, ", "), nil
+	return output, nil
 }
