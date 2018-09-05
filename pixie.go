@@ -19,14 +19,19 @@ var ValidCommands map[string]Command
 func init() {
 	// initialize the list of valid commands
 	ValidCommands = make(map[string]Command)
-	ValidCommands["bg"] = Command{}    //TODO
-	ValidCommands["class"] = Command{} //TODO
+
 	ValidCommands["help"] = Command{Name: "help", Fn: ListCommands, Description: "list available commands"}
-	ValidCommands["item"] = Command{} //TODO
-	ValidCommands["race"] = Command{} //TODO
 	ValidCommands["roll"] = Command{Name: "roll", Fn: Roll, Description: "simulate dice rolls"}
-	ValidCommands["rule"] = Command{}  //TODO
-	ValidCommands["spell"] = Command{} //TODO
+
+	// add find commands only if data files are loaded
+	if FilesLoaded() {
+		ValidCommands[bg] = Command{Name: bg, Fn: FindBackground, Description: "find a source book reference for a background"} //TODO
+		ValidCommands[class] = Command{Name: class, Fn: FindClass, Description: "find a source book reference for a class"}     //TODO
+		ValidCommands[item] = Command{Name: item, Fn: FindItem, Description: "find a source book reference for an item"}        //TODO
+		ValidCommands[race] = Command{Name: race, Fn: FindRace, Description: "find a source book reference for a race"}         //TODO
+		ValidCommands[rule] = Command{Name: rule, Fn: FindRule, Description: "find a source book reference for a rule"}         //TODO
+		ValidCommands[spell] = Command{Name: spell, Fn: FindSpell, Description: "find a source book reference for a spell"}     //TODO
+	}
 
 	if len(ValidCommands) == 0 {
 		log.Fatalf("No commands available to run; exiting")
