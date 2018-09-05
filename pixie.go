@@ -25,12 +25,12 @@ func init() {
 
 	// add find commands only if data files are loaded
 	if FilesLoaded() {
-		ValidCommands[bg] = Command{Name: bg, Fn: FindBackground, Description: "find a source book reference for a background"} //TODO
-		ValidCommands[class] = Command{Name: class, Fn: FindClass, Description: "find a source book reference for a class"}     //TODO
-		ValidCommands[item] = Command{Name: item, Fn: FindItem, Description: "find a source book reference for an item"}        //TODO
-		ValidCommands[race] = Command{Name: race, Fn: FindRace, Description: "find a source book reference for a race"}         //TODO
-		ValidCommands[rule] = Command{Name: rule, Fn: FindRule, Description: "find a source book reference for a rule"}         //TODO
-		ValidCommands[spell] = Command{Name: spell, Fn: FindSpell, Description: "find a source book reference for a spell"}     //TODO
+		ValidCommands[bg] = Command{Name: bg, Fn: FindBackground, Description: "find a source book reference for a background"}
+		ValidCommands[class] = Command{Name: class, Fn: FindClass, Description: "find a source book reference for a class"}
+		ValidCommands[item] = Command{Name: item, Fn: FindItem, Description: "find a source book reference for an item"}
+		ValidCommands[race] = Command{Name: race, Fn: FindRace, Description: "find a source book reference for a race"}
+		ValidCommands[rule] = Command{Name: rule, Fn: FindRule, Description: "find a source book reference for a rule"}
+		ValidCommands[spell] = Command{Name: spell, Fn: FindSpell, Description: "find a source book reference for a spell"}
 	}
 
 	if len(ValidCommands) == 0 {
@@ -45,10 +45,10 @@ func ParseUserInput(input string) (string, []string, *BotError) {
 	val := strings.ToLower(strTokens[0])
 	if _, ok := ValidCommands[val]; !ok {
 		return "", nil, &BotError{err: fmt.Sprintf("received invalid command '%s'", val),
-			botMsg: fmt.Sprintf("Sorry, I don't know what to do with '%s'!", val)}
+			botMsg: fmt.Sprintf(":x: Sorry, I don't know what to do with '%s'!", val)}
 	}
 
-	return strTokens[0], strTokens[1:], nil
+	return val, strTokens[1:], nil
 }
 
 // Run attempts to process and execute the user's input, if possible
@@ -60,12 +60,6 @@ func Run(input string) (string, *BotError) {
 
 	// get the func tied to the task and execute it to get the output
 	cmd := ValidCommands[name]
-
-	//TODO: remove this block when all commands are implemented
-	if cmd.Fn == nil {
-		return "Sorry, but this command is coming soon! :sob:", nil
-	}
-
 	output, err := cmd.Fn(params)
 	if err != nil {
 		return "", err
@@ -76,12 +70,12 @@ func Run(input string) (string, *BotError) {
 
 // ListCommands lists the available commands the user can input
 func ListCommands(input []string) (string, *BotError) {
-	output := "Hey there. Here are the things I know how to do: "
+	output := "Hey there. Here are the things I know how to do:"
 	for key, cmd := range ValidCommands {
 		if cmd.Description != "" {
-			output += fmt.Sprintf("%s (%s), ", key, cmd.Description)
+			output += fmt.Sprintf("\n:arrow_forward: %s (%s)", key, cmd.Description)
 		} else {
-			output += key + ", "
+			output += fmt.Sprintf("\n:arrow_forward: %s", key)
 		}
 	}
 	return strings.TrimSuffix(output, ", "), nil
