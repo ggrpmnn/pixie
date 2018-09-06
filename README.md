@@ -6,7 +6,7 @@ Pixie is a [Discord](https://discordapp.com/) bot designed to assist with playin
 
 Pixie needs to be added to a server by someone with admin permissions. If you would like to add the pixie app, simply [click this link](https://discordapp.com/api/oauth2/authorize?client_id=484413321597026325&permissions=448576&scope=bot) to get started.
 
-Currently Pixie is still in alpha/early development and is not online very much. Please come back soon for updates!
+Currently Pixie is still in alpha/early development and is not online very much. Please come back soon for updates.
 
 ### Functionality
 
@@ -14,4 +14,4 @@ Pixie is designed to be used from the chat window of a Discord server. All comma
 
 ### Acknowledgements
 
-Thanks to Wizards of the Coast for making such a great game. All copyrights are respected and any 5e content is their property. Please buy the source books!
+Thanks to Wizards of the Coast for making such a great game. All copyrights are respected and any 5e content is their property. Please buy the source books and support the game!
