@@ -76,13 +76,16 @@ func removeLowestInRow(row []int) string {
 	return fmt.Sprintf("%d: [%s]\n", sum, output)
 }
 
-// reverses a row's contents
+// reverse reverses a row's contents
 func reverse(row []int) {
 	for idx, jdx := 0, len(row)-1; idx < jdx; idx, jdx = idx+1, jdx-1 {
 		row[idx], row[jdx] = row[jdx], row[idx]
 	}
 }
 
+// startsWithVowel returns true if a string starts with a vowel character;
+// this is a naive approach to cover 90% of cases where we need to switch
+// from 'a' to 'an' in various strings
 func startsWithVowel(str string) bool {
 	ch := str[0]
 	return ch == 'a' || ch == 'e' || ch == 'i' || ch == 'o' || ch == 'u'
