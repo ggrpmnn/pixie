@@ -1,5 +1,7 @@
 # Pixie
 
+<img src="./img/pixie.jpg" width="250" height="250" align="right">
+
 Pixie is a [Discord](https://discordapp.com/) bot designed to assist with playing D&D 5e. Mostly it helps with referring to source books (by telling you which book and page a piece of information is on), but it can also roll dice, generate basic random characters, and more.
 
 ### Having Pixie Connect to Your Server
