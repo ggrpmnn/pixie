@@ -5,9 +5,11 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"math/rand"
 	"os"
 	"regexp"
 	"strings"
+	"time"
 )
 
 var (
@@ -22,7 +24,8 @@ var (
 
 	filesLoaded = false
 
-	lookup []SourceEntry
+	// Lookup is a lookup table for all the data loaded from CSV
+	Lookup []SourceEntry
 )
 
 // SourceEntry houses the data for a particular entry parsed from the data files
@@ -40,11 +43,11 @@ func init() {
 		return
 	}
 
-	lookup = make([]SourceEntry, 0)
+	Lookup = make([]SourceEntry, 0)
 	// load the data from each CSV file
 	for _, file := range files {
 		log.Printf("Loading data file '%s'", file.Name())
-		lookup = append(lookup, LoadFromCSV(file)...)
+		Lookup = append(Lookup, LoadFromCSV(file)...)
 	}
 
 	filesLoaded = true
@@ -114,7 +117,7 @@ func FindSpell(input []string) (string, *BotError) {
 func find(entryType string, query string) (string, *BotError) {
 	query = strings.ToLower(query)
 	// lookup the type, then the name
-	results := filter(lookup, entryType, filterType)
+	results := filter(Lookup, entryType, filterType)
 	if len(*results) > 0 {
 		results = filter(*results, query, filterName)
 	}
@@ -165,4 +168,12 @@ func LoadFromCSV(file os.FileInfo) []SourceEntry {
 	}
 
 	return entries
+}
+
+// returns a random entry of the specified type
+func randomEntry(kind string) *SourceEntry {
+	results := filter(Lookup, kind, filterType)
+	source := rand.NewSource(time.Now().UnixNano())
+	rnd := rand.New(source)
+	return &(*results)[rnd.Intn(len(*results))]
 }

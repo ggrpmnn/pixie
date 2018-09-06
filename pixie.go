@@ -34,7 +34,8 @@ func init() {
 		ValidCommands[rule] = Command{Name: rule, Emoji: "scales", Fn: FindRule, Description: "find a source book reference for a rule"}
 		ValidCommands[spell] = Command{Name: spell, Emoji: "fire", Fn: FindSpell, Description: "find a source book reference for a spell"}
 
-		ValidCommands["generate"] = Command{Name: "generate", Emoji: "", Fn: nil, Description: "generate a random character"}
+		// TODO: finish this
+		ValidCommands["generate"] = Command{Name: "generate", Emoji: "8ball", Fn: Generate, Description: "generate a random character"}
 	}
 
 	if len(ValidCommands) == 0 {
@@ -44,7 +45,7 @@ func init() {
 
 // ListCommands lists the available commands the user can input
 func ListCommands(input []string) (string, *BotError) {
-	output := ":information_source: Hey there! Here are the things I know how to do:"
+	output := ":wave: Hey there! Here are the things I know how to do:"
 
 	keys := ListKeys()
 	for _, key := range keys {
@@ -80,7 +81,7 @@ func ParseUserInput(input string) (string, []string, *BotError) {
 	val := strings.ToLower(strTokens[0])
 	if _, ok := ValidCommands[val]; !ok {
 		return "", nil, &BotError{err: fmt.Sprintf("received invalid command '%s'", val),
-			botMsg: fmt.Sprintf(":x: Sorry, I don't know what to do with '%s'!", val)}
+			botMsg: fmt.Sprintf(":x: Sorry, I don't know how to '%s'.", val)}
 	}
 
 	return val, strTokens[1:], nil
