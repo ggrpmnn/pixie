@@ -1,18 +1,17 @@
-# Binaries for programs and plugins
+# Binaries and shared object files
 *.exe
 *.exe~
 *.dll
 *.so
 *.dylib
 
-# Test binary, build with `go test -c`
+# Tool outputs
 *.test
-
-# Output of the go coverage tool, specifically when used with LiteIDE
 *.out
 
 # Ignore vendor dir (but keep the dir itself)
-vendor/
+vendor/*
 
-# Ignore the config file
+# App-specific files
+data/*
 pixie-config.json
